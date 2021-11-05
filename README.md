@@ -1,1 +1,2 @@
 # mjviz
+Julia bindings for MuJoCo physics simulation and visualization. This package is a more easy-to-use (at least for me) adaptation of the awesome [LyceumMuJoCo.jl and LyceumMuJoCoViz.jl packages](https://docs.lyceum.ml/dev/).
