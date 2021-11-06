@@ -88,14 +88,18 @@ function visualize(
     model::Union{AbstractString,MJSim,AbstractMuJoCoEnvironment};
     trajectories::Union{Nothing,AbsMat,AbsVec{<:AbsMat}} = nothing,
     controller = nothing,
-    windowsize::NTuple{2,Integer} = default_windowsize()
+    windowsize::NTuple{2,Integer} = default_windowsize(),
+    mode = "active"
 )
     model isa AbstractString && (model = MJSim(model))
     reset!(model)
 
-    modes = EngineMode[PassiveDynamics()]
-    !isnothing(trajectories) && push!(modes, Trajectory(trajectories))
-    !isnothing(controller) && push!(modes, Controller(controller))
+    # modes = EngineMode[PassiveDynamics()]
+    # !isnothing(trajectories) && push!(modes, Trajectory(trajectories))
+    # !isnothing(controller) && push!(modes, Controller(controller))
+
+    modes = EngineMode[]
+    mode == "active" && push!(modes, Controller(controller))
 
     run(Engine(windowsize, model, Tuple(modes)))
     return

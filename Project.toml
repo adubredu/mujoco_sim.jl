@@ -13,6 +13,7 @@ LyceumMuJoCo = "48b9757e-04b8-4dbf-b6ed-75c13d9e4026"
 MuJoCo = "93189219-7048-461c-94ec-443a161ed927"
 Observables = "510215fc-4207-5dde-b226-833fc4488ee2"
 PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 

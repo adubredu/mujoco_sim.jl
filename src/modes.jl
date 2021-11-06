@@ -54,6 +54,7 @@ end
 function forwardstep!(p::PhysicsState, x::Controller)
     dt = @elapsed x.controller(p.model)
     x.realtimefactor = timestep(p.model) / dt
+    println("in ctrler: ",p.model.d.ctrl)
     return forwardstep!(p)
 end
 
