@@ -1,9 +1,8 @@
 module mujoco_sim
 
-using Base: RefValue, @lock, @lock_nofail
-
+using Base: RefValue, @lock, @lock_nofail, @propagate_inbounds 
 # Stdlib
-using Printf: @printf
+using Printf: @printf 
 
 # 3rd party
 using GLFW: GLFW, Window, Key, Action, MouseButton, GetKey, RELEASE, PRESS, REPEAT
@@ -13,15 +12,20 @@ using StaticArrays: SVector, MVector
 using DocStringExtensions
 using Observables: AbstractObservable, Observable, on, off
 using FFMPEG
+using UnsafeArrays
+using Shapes
 
 # Lyceum
-using MuJoCo, MuJoCo.MJCore
-using LyceumMuJoCo
-import LyceumMuJoCo: reset!
-using LyceumBase: LyceumBase, Maybe, AbsVec, AbsMat
+using MuJoCo, MuJoCo.MJCore 
+using MuJoCo.MJCore: mjtNum
+using LyceumBase: LyceumBase, Maybe, AbsVec, AbsMat, @mustimplement
+ 
+const RealVec = AbstractVector{<:Real}
 
-
-export visualize
+include("mjsim.jl")
+export MJSim, zeroctrl!, zerofullctrl!, forward!, reset!
+export setaction!, getaction!, getstate!, getaction, getstate
+export simulate
 
 
 const FONTSCALE = MJCore.FONTSCALE_150 # can be 100, 150, 200
@@ -47,69 +51,27 @@ include("defaulthandlers.jl")
 
  
 
-
-"""
-    $(TYPEDSIGNATURES)
-
-Starts an interactive visualization of `model`, which can be a valid subtype of
-`AbstractMuJoCoEnvironment`, a `MJSim` simulation, or the path to a valid MuJoCo model file.
-The visualizer has several "modes" that allow you to visualize passive dynamics,
-play back recorded trajectories, and run a controller interactively. The passive dynamics
-mode depends only on `model` and is always available, while the other modes are specified
-by the keyword arguments below.
-
-# Keywords
-
-- `trajectories`: a single trajectory or vector of trajectories, where each
-    trajectory is an AbstractMatrix of states with size `(length(statespace(model)), T)` and
-    `T` is the length of the trajectory. Note that each trajectory can have different length.
-- `controller`: a callback function with the signature `controller(model)`, called at each
-    timestep, that applies a control input to the system.
-- `windowsize`: resolution of visualizer window. Defaults to an internal heuristic.
-
-# Examples
-```julia
-using LyceumMuJoCo, LyceumMuJoCoViz
-env = LyceumMuJoCo.HopperV2()
-T = 100
-states = Array(undef, statespace(env), T)
-for t = 1:T
-    step!(env)
-    states[:, t] .= getstate(env)
-end
-visualize(
-    env,
-    trajectories = states,
-    controller = env -> setaction!(env, rand(actionspace(env)))
-)
-```
-"""
-function visualize(
-    model::Union{AbstractString,MJSim,AbstractMuJoCoEnvironment};
+ 
+function simulate(
+    model::Union{AbstractString,MJSim };
     trajectories::Union{Nothing,AbsMat,AbsVec{<:AbsMat}} = nothing,
     controller = nothing,
     windowsize::NTuple{2,Integer} = default_windowsize(),
     mode = "active"
 )
     model isa AbstractString && (model = MJSim(model))
-    reset!(model)
-
-    # modes = EngineMode[PassiveDynamics()]
-    # !isnothing(trajectories) && push!(modes, Trajectory(trajectories))
-    # !isnothing(controller) && push!(modes, Controller(controller))
+    reset!(model) 
 
     modes = EngineMode[]
     mode == "active" && push!(modes, Controller(controller))
+    mode == "passive" && push!(modes, PassiveDynamics())
 
     run(Engine(windowsize, model, Tuple(modes)))
     return
 end
 
 
-function run(e::Engine)
-    if e.phys.model isa AbstractMuJoCoEnvironment
-        e.ui.reward = getreward(e.phys.model)
-    end
+function run(e::Engine) 
 
     # render first frame before opening window
     prepare!(e)
@@ -169,8 +131,7 @@ end
 
 function prepare!(e::Engine)
     ui, p = e.ui, e.phys
-    sim = getsim(p.model)
-    p.model isa AbstractMuJoCoEnvironment && (ui.reward = getreward(p.model))
+    sim = getsim(p.model) 
     mjv_updateScene(
         sim.m,
         sim.d,

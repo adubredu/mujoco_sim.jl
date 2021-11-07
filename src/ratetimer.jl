@@ -25,4 +25,4 @@ Base.time(rt::RateTimer) = time_ns(rt) / 1e9
 stop!(rt::RateTimer) = (rt.elapsed = time_ns(rt); rt.paused = true; rt)
 start!(rt::RateTimer) = (rt.tlast = time_ns(); rt.paused = false; rt)
 setrate!(rt::RateTimer, r) = (rt.rate = r; rt)
-LyceumBase.reset!(rt::RateTimer) = (rt.tlast = time_ns(); rt.elapsed = 0; rt)
+reset!(rt::RateTimer) = (rt.tlast = time_ns(); rt.elapsed = 0; rt)

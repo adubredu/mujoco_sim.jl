@@ -1,13 +1,13 @@
 abstract type EngineMode end
 
-mutable struct PhysicsState{T<:Union{MJSim,AbstractMuJoCoEnvironment}}
+mutable struct PhysicsState{T<:Union{MJSim }}
     model::T
     pert::RefValue{mjvPerturb}
     elapsedsim::Float64
     timer::RateTimer
     lock::ReentrantLock
 
-    function PhysicsState(model::Union{MJSim,AbstractMuJoCoEnvironment})
+    function PhysicsState(model::Union{MJSim })
         pert = Ref(mjvPerturb())
         mjv_defaultPerturb(pert)
         new{typeof(model)}(model, pert, 0, RateTimer(), ReentrantLock())
@@ -56,8 +56,8 @@ mutable struct Engine{T,M}
     videodst::Maybe{String}
     min_refreshrate::Int
 
-    function Engine(windowsize::NTuple{2,Integer}, model::Union{MJSim,AbstractMuJoCoEnvironment}, modes::Tuple{Vararg{EngineMode}})
-        window = create_window(windowsize..., "LyceumMuJoCoViz")
+    function Engine(windowsize::NTuple{2,Integer}, model::Union{MJSim }, modes::Tuple{Vararg{EngineMode}})
+        window = create_window(windowsize..., "MUJOCO_SIM")
         try
             phys = PhysicsState(model)
             ui = UIState()

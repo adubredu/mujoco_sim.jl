@@ -132,15 +132,6 @@ function overlay_info(rect::MJCore.mjrRect, e::Engine)
     println(io1, "Label")
     println(io2, MJCore.mjLABELSTRING[e.ui.vopt[].label+1])
 
-    # env specific info
-    if phys.model isa AbstractMuJoCoEnvironment
-        name = string(Base.nameof(typeof(phys.model)))
-        println(io1, "Env")
-        println(io2, name)
-
-        println(io1, "Reward")
-        @printf io2 "%.5g\n" ui.reward
-    end
 
     # mode specific info
     println(io1, "Mode Info")
