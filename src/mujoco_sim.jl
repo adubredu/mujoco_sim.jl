@@ -1,4 +1,4 @@
-module mjviz
+module mujoco_sim
 
 using Base: RefValue, @lock, @lock_nofail
 
