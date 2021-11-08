@@ -25,7 +25,7 @@ const RealVec = AbstractVector{<:Real}
 include("mjsim.jl")
 export MJSim, zeroctrl!, zerofullctrl!, forward!, reset!
 export setaction!, getaction!, getstate!, getaction, getstate
-export simulate
+export simulate, activate_mujoco, get_model, get_data
 
 
 const FONTSCALE = MJCore.FONTSCALE_150 # can be 100, 150, 200
@@ -47,9 +47,7 @@ include("ratetimer.jl")
 include("types.jl")
 include("functions.jl")
 include("modes.jl")
-include("defaulthandlers.jl")
-
- 
+include("defaulthandlers.jl") 
 
  
 function simulate(

@@ -1,11 +1,10 @@
-using Revise
-using MuJoCo 
+# using Revise 
 using mujoco_sim
 import Distributions: Uniform 
 using MatrixEquations
 
 keypath = joinpath(@__DIR__, "../key/mjkey.txt") 
-mj_activate(keypath) 
+activate_mujoco(keypath)
 
 function lqr(A, B, Q, R)
     G = B*inv(R)*B' 
@@ -19,6 +18,7 @@ M = mk = 1.5
 m = mp = 0.5
 g = 9.81
 l = lp = 0.3 
+noise = 0.5
 
 a = g/(lp*(4.0/3 - mp/(mp+mk)))
 A =[[0. 1. 0. 0.];
@@ -49,17 +49,18 @@ end
 function ctrler!(s) 
     x = [s.d.qpos[1], s.d.qvel[1],s.d.qpos[2], s.d.qvel[2]] 
     u = apply_ctrl(K,x) 
-    if s.d.time < 0.05 #randomize pole deviation initially to make things interesting
-        u = [rand(Uniform(-0.5,0.5))]
+
+    #randomize init pole deviation to make things interesting
+    if s.d.time < 0.25
+        u = [rand(Uniform(-noise, noise))]
     end 
     setaction!(s, u)
     # println("state: ",s.d.qpos[2], " action: ",s.d.ctrl) 
 end
 
-m = jlModel("models/cartpole.xml")
-d = jlData(m) 
-sim = MJSim(m,d) 
-sim.d.qpos[2] = -1.57 
+m = get_model("models/cartpole.xml")
+d = get_data(m) 
+sim = MJSim(m,d)   
 simulate( sim, controller = ctrler!;mode="active")
 
 

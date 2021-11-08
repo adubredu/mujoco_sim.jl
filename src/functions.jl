@@ -34,6 +34,18 @@ function switchmode!(e::Engine, idx::Integer)
     return e
 end
 
+function activate_mujoco(key_path::String)
+    mj_activate(key_path) 
+end
+
+function get_model(model_path::String)
+    return jlModel(model_path)
+end 
+
+function get_data(model)
+    return jlData(model)
+end
+
 
 function printhelp(e::Engine)
     io = e.ui.io1
