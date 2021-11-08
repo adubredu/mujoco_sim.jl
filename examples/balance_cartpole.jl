@@ -14,8 +14,8 @@ function lqr(A, B, Q, R)
 end 
 
 T = 100
-M = mk = 1.5
-m = mp = 0.5
+mk = 1.5
+mp = 0.5
 g = 9.81
 l = lp = 0.3 
 noise = 0.5
