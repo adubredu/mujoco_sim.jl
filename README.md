@@ -1,5 +1,5 @@
 # mujoco_sim.jl
-Julia bindings for MuJoCo physics simulation and visualization. This package is a more easy-to-use (at least for me) adaptation of the awesome [LyceumMuJoCo.jl and LyceumMuJoCoViz.jl packages](https://docs.lyceum.ml/dev/).
+Julia package for MuJoCo physics simulation and visualization. This package is a more easy-to-use (at least for me) adaptation of the awesome [LyceumMuJoCo.jl and LyceumMuJoCoViz.jl packages](https://docs.lyceum.ml/dev/).
 
 ## Installation
 1. Open your Julia REPL by typing  `julia` in your terminal.
