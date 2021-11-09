@@ -23,9 +23,11 @@ using LyceumBase: LyceumBase, Maybe, AbsVec, AbsMat, @mustimplement
 const RealVec = AbstractVector{<:Real}
 
 include("mjsim.jl")
+include("inverse_kinematics.jl")
 export MJSim, zeroctrl!, zerofullctrl!, forward!, reset!
 export setaction!, getaction!, getstate!, getaction, getstate
 export simulate, activate_mujoco, get_model, get_data
+export inverse_kinematics!
 
 
 const FONTSCALE = MJCore.FONTSCALE_150 # can be 100, 150, 200

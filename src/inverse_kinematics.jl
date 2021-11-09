@@ -14,9 +14,9 @@ end
 
 
 
-function inverse_kinematics(sim::MJSim, site_name::String,
-    target_pos::Union{VecOrMat{Float64},Nothing}; 
-    target_quat::Union{VecOrMat{Float64},Nothing}=nothing, 
+function inverse_kinematics!(sim::MJSim, site_name::String,
+    target_pos::Union{Vector{Float64},Nothing}, 
+    target_quat::Union{Vector{Float64},Nothing}=nothing, 
     joint_names=nothing,
     tol::Float64=1E-14, rot_weight::Float64=1.0, 
     regularization_threshold::Float64=0.1,
@@ -33,8 +33,8 @@ function inverse_kinematics(sim::MJSim, site_name::String,
     else 
         jac = Array{Float64}(undef, 6, sim.m.nv)#zeros((6, sim.m.nv))
         err = Array{Float64}(undef, 6)#zeros(6)
-        jac_pos, jac_rot = jac[:4], jac[4:end]
-        err_pos, err_rot = err[:4], err[4:end]
+        jac_pos, jac_rot = jac[1:4], jac[4:end]
+        err_pos, err_rot = err[1:4], err[4:end]
     end 
 
     update_nv = zeros(sim.m.nv)
@@ -50,7 +50,7 @@ function inverse_kinematics(sim::MJSim, site_name::String,
     site_id = jl_name2id(sim.m, MJCore.mjOBJ_SITE, site_name)
 
     site_xpos = sim.d.site_xpos[:,site_id]
-    site_mat = sim.d.site_xmat[:,site_id]
+    site_xmat = sim.d.site_xmat[:,site_id]
 
     if isnothing(joint_names)
         dof_indices = sim.m.dof_jntid
@@ -67,10 +67,10 @@ function inverse_kinematics(sim::MJSim, site_name::String,
 
     for steps = 1:max_steps
         
-        err_num = 0.0
+        err_norm = 0.0
 
         if !isnothing(target_pos)
-            err_pos[:] = target_pos - site_xpos 
+            err_pos = target_pos - site_xpos 
             err_norm += norm(err_pos)
         end
 
@@ -79,7 +79,7 @@ function inverse_kinematics(sim::MJSim, site_name::String,
             MJCore.mju_mat2Quat(site_xquat, site_xmat)
             MJCore.mju_negQuat(neg_site_xquat, site_xquat)
             MJCore.mju_mulQuat(err_rot_quat, target_quat, neg_site_xquat)
-            MJCore.mju_quat2Vel(err_rot, err_rot_quat, 1)
+            MJCore.mju_quat2Vel(err_rot, err_rot_quat, 1.)
             err_norm += norm(err_rot)*rot_weight
         end
 
@@ -99,7 +99,7 @@ function inverse_kinematics(sim::MJSim, site_name::String,
             update_joints = nullspace_method(jac_joints, err, 
                                 regularization_strength=reg_strength)
             update_norm = norm(update_joints)
-
+            println(update_joints)
             progress_criterion = err_norm/update_norm 
             if progress_criterion > progress_thresh 
                 break 
@@ -107,12 +107,12 @@ function inverse_kinematics(sim::MJSim, site_name::String,
             if update_norm > max_update_norm 
                 update_joints *= max_update_norm/update_norm 
             end
-
+            
             for i in dof_indices
                 update_nv[i] = update_joints[i]
             end
 
-            mj_integratePos(sim.m, sim.d.qpos, update_nv, 1)
+            mj_integratePos(sim.m, sim.d.qpos, update_nv, 1.)
             mj_fwdPosition(sim.m, sim.d)
         end
     end
