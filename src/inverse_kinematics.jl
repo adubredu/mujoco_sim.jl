@@ -18,11 +18,13 @@ function inverse_kinematics!(sim::MJSim, site_name::String,
     target_pos::Union{Vector{Float64},Nothing}, 
     target_quat::Union{Vector{Float64},Nothing}=nothing, 
     joint_names=nothing,
-    tol::Float64=1E-14, rot_weight::Float64=1.0, 
+    tol::Float64=1E-14, 
+    rot_weight::Float64=1.0, 
     regularization_threshold::Float64=0.1,
     regularization_strength::Float64=3E-2, 
     max_update_norm::Float64=2.0,
-    progress_thresh::Float64=2.0, max_steps::Int64=100)
+    progress_thresh::Float64=20.0, 
+    max_steps::Int64=100)
 
     if isnothing(target_quat)
         jac = Array{Float64}(undef, 3, sim.m.nv)#zeros((3, sim.m.nv))
@@ -51,6 +53,7 @@ function inverse_kinematics!(sim::MJSim, site_name::String,
 
     site_xpos = sim.d.site_xpos[:,site_id]
     site_xmat = sim.d.site_xmat[:,site_id]
+    println("site pos: ",site_xpos)
 
     if isnothing(joint_names)
         dof_indices = sim.m.dof_jntid
@@ -60,6 +63,7 @@ function inverse_kinematics!(sim::MJSim, site_name::String,
             jid = jl_name2id(sim.m, MJCore.mjOBJ_JOINT, joint_name)
             push!(dof_indices, jid)
         end
+        println("dof inds: ",dof_indices)
     end
 
     steps = 0
@@ -79,6 +83,7 @@ function inverse_kinematics!(sim::MJSim, site_name::String,
             MJCore.mju_mat2Quat(site_xquat, site_xmat)
             MJCore.mju_negQuat(neg_site_xquat, site_xquat)
             MJCore.mju_mulQuat(err_rot_quat, target_quat, neg_site_xquat)
+            println("error rot: ",err_rot)
             MJCore.mju_quat2Vel(err_rot, err_rot_quat, 1.)
             err_norm += norm(err_rot)*rot_weight
         end

@@ -64,7 +64,7 @@ end
 m = get_model("models/cartpole.xml")
 d = get_data(m) 
 sim = MJSim(m,d)   
-simulate( sim, controller = ctrler!;mode="active")
+simulate( sim, controller = ctrler!; mode="active")
 
 
 
